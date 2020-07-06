@@ -1,0 +1,12 @@
+{
+    "Description": '''
+SnowGem is the first Equihash – zkSNARKs – Masternode system. zkSNARKs shields your SnowGem transaction which is fully encrypted on the blockchain. 
+Masternodes secure the network against 51% attacks and helps us achieve faster private transactions. SnowGem uses a mining algorithm that is 100% ASIC resistant.
+'''
+    Links: [
+        { 
+            website: "https://explorer.snowgem.org/",
+            explorer: "https://snowgem.org/"
+        }
+    ]
+}
