@@ -18,7 +18,12 @@ SnowGem node AMI app.
     },
     "configuration": {
         "NODE_PRIVKEY" : "xxxxxxxxxxxxxxxxxxxxxxxxx",
-        "IP" : "127.0.0.1"
+        "RPC_USER": "yyyyy", 
+        "RPC_PASS": "xxxxxyyyyy",
+        "RPC_PORT": 16111,
+        "DAEMON_CONFIGURATION": {
+            "externalip" : "127.0.0.1"
+        }
     },
     "user": "xsg1", 
 }
