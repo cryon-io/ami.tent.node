@@ -1,6 +1,6 @@
 {
     "id": "xsg.node" ,
-    "version" : "0.0.2",
+    "version" : "0.0.3",
     "dependencies": [
         { "id":"btc.base" },
         { "id": "xsg.binaries"}
