@@ -17,7 +17,6 @@ APP.model = eliUtil.merge_tables(
         DAEMON_CONFIGURATION = {
             rpcuser = APP.configuration.RPC_USER or APP.user,
             rpcpassword = APP.configuration.RPC_PASS or _rpcPass,
-            rpcport = APP.configuration.RPC_PORT or 16111,
             server = (type(APP.configuration.NODE_PRIVKEY) == 'string' or APP.configuration.SERVER) and 1 or nil,
             listen = (type(APP.configuration.NODE_PRIVKEY) == 'string' or APP.configuration.SERVER) and 1 or nil,
             masternodeprivkey = APP.configuration.NODE_PRIVKEY,
