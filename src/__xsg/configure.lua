@@ -11,6 +11,10 @@ if not _ok then
     log_warn("Failed to install " .. (_dep or '-').. "! - " .. _error)
 end
 
+local _confDest = eliPath.combine(DATA_PATH, APP.model.MN_CONF_NAME)
+local _ok, _error = eliFs.safe_copy_file(APP.model.MN_CONF_SOURCE, _confDest)
+ami_assert(_ok, "Failed to deploy " .. APP.model.MN_CONF_NAME .. ": " .. (_error or ""))
+
 local _fetchScriptPath = "bin/fetch-params.sh"
 local _ok, _error = eliNet.safe_download_file("https://raw.githubusercontent.com/Snowgem/Snowgem/master/zcutil/fetch-params.sh", _fetchScriptPath, {followRedirects = true})
 if not _ok then 
