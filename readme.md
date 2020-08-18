@@ -23,6 +23,9 @@ SnowGem node AMI app.
         "RPC_PORT": 16111,
         "DAEMON_CONFIGURATION": {
             "externalip" : "127.0.0.1"
+        },
+        "MASTERNODE_CONFIGURATION" : {
+            ...
         }
     },
     "user": "xsg1", 
