@@ -11,7 +11,11 @@ _charset="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 _charset:gsub(".",function(c) table.insert(_charsetTable,c) end)
 local _rpcPass = eliUtil.random_string(20, _charsetTable)
 
-local _masternodeConf = eliUtil.merge_tables(APP.configuration.MASTERNODE_CONFIGURATION or {}, { ip = type(APP.configuration.DAEMON_CONFIGURATION) == 'table' and APP.configuration.DAEMON_CONFIGURATION.externalip })
+local _masternodeConf = eliUtil.merge_tables(APP.configuration.MASTERNODE_CONFIGURATION or {}, {
+    alias = APP.id,
+    ip = type(APP.configuration.DAEMON_CONFIGURATION) == 'table' and APP.configuration.DAEMON_CONFIGURATION.externalip,
+    port = type(APP.configuration.port) == 'table' and APP.configuration.DAEMON_CONFIGURATION.port or 16113,
+})
 
 APP.model = eliUtil.merge_tables(
     APP.model,

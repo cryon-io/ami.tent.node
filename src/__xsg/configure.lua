@@ -11,6 +11,9 @@ if not _ok then
     log_warn("Failed to install " .. (_dep or '-').. "! - " .. _error)
 end
 
+local DATA_PATH = APP.model.DATA_DIR
+local _ok, _error = eliFs.safe_mkdirp(DATA_PATH)
+
 local _confDest = eliPath.combine(DATA_PATH, APP.model.MN_CONF_NAME)
 local _ok, _error = eliFs.safe_copy_file(APP.model.MN_CONF_SOURCE, _confDest)
 ami_assert(_ok, "Failed to deploy " .. APP.model.MN_CONF_NAME .. ": " .. (_error or ""))
