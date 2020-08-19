@@ -13,9 +13,11 @@ local _rpcPass = eliUtil.random_string(20, _charsetTable)
 
 local _masternodeConf = eliUtil.merge_tables(APP.configuration.MASTERNODE_CONFIGURATION or {}, {
     alias = APP.id,
-    ip = type(APP.configuration.DAEMON_CONFIGURATION) == 'table' and APP.configuration.DAEMON_CONFIGURATION.externalip,
+    ip = type(APP.configuration.DAEMON_CONFIGURATION) == 'table' and APP.configuration.DAEMON_CONFIGURATION.bind or APP.configuration.DAEMON_CONFIGURATION.externalip,
     port = type(APP.configuration.port) == 'table' and APP.configuration.DAEMON_CONFIGURATION.port or 16113,
 })
+
+_masternodeConf.ip = type(_masternodeConf.ip) == "string" and string.match(_masternodeConf.ip, ":") and '[' .. _masternodeConf.ip .. ']' or _masternodeConf.ip
 
 APP.model = eliUtil.merge_tables(
     APP.model,
