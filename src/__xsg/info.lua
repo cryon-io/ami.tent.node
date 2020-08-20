@@ -13,10 +13,15 @@ _info.level = "ok"
 _info.synced = "not reported"
 
 local function _exec_xsg_cli(...)
-    local _cmd = exString.join_strings(" ", ...)
+
+    local arg = { "-datadir=data", ... }
+    if type(APP.configuration.DAEMON_CONFIGURATION) == "table" and type(APP.configuration.DAEMON_CONFIGURATION.rpcbind) == "string" then
+        table.insert(arg, 1, "-rpcconnect=" .. APP.configuration.DAEMON_CONFIGURATION.rpcbind)
+    end
+    local _cmd = exString.join_strings(" ", table.unpack(arg))
     local _rd, _proc_wr = eliFs.pipe()
     local _rderr, _proc_werr = eliFs.pipe()
-    local _proc, _err = eliProc.spawn {"bin/snowgem-cli", args = { ... }, stdout = _proc_wr, stderr = _proc_werr}
+    local _proc, _err = eliProc.spawn {"bin/snowgem-cli", args = arg, stdout = _proc_wr, stderr = _proc_werr}
     _proc_wr:close()
     _proc_werr:close()
 
@@ -53,7 +58,7 @@ end
 
 if _info.snowgemd == "running" then
     if APP.configuration.NODE_PRIVKEY ~= nil then 
-        local _exitcode, _stdout, _stderr = _exec_xsg_cli("-datadir=data", "masternode", "status")
+        local _exitcode, _stdout, _stderr = _exec_xsg_cli("masternode", "status")
         local _success, _output = _get_xsg_cli_result(_exitcode, _stdout, _stderr)
 
         _info.status = _output.message
@@ -65,7 +70,7 @@ if _info.snowgemd == "running" then
     else 
         _info.level = "ok"
     end
-    local _exitcode, _stdout, _stderr = _exec_xsg_cli("-datadir=data", "getblockchaininfo")
+    local _exitcode, _stdout, _stderr = _exec_xsg_cli("getblockchaininfo")
     local _success, _output = _get_xsg_cli_result(_exitcode, _stdout, _stderr)
 
     if _success then 
