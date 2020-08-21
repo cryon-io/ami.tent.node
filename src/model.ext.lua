@@ -15,6 +15,7 @@ local _masternodeConf = eliUtil.merge_tables(APP.configuration.MASTERNODE_CONFIG
     alias = APP.id,
     ip = type(APP.configuration.DAEMON_CONFIGURATION) == 'table' and APP.configuration.DAEMON_CONFIGURATION.bind or APP.configuration.DAEMON_CONFIGURATION.externalip,
     port = type(APP.configuration.port) == 'table' and APP.configuration.DAEMON_CONFIGURATION.port or 16113,
+    mnkey = APP.configuration.DAEMON_CONFIGURATION.masternodeprivkey
 })
 
 _masternodeConf.ip = type(_masternodeConf.ip) == "string" and string.match(_masternodeConf.ip, ":") and '[' .. _masternodeConf.ip .. ']' or _masternodeConf.ip
