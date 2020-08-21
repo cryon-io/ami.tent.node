@@ -5,9 +5,10 @@ local _ok, _systemctl = safe_load_plugin("systemctl")
 ami_assert(_ok, "Failed to load systemctl plugin", EXIT_APP_START_ERROR)
 
 local _info = {}
-local _ok, _status = _systemctl.safe_get_service_status(APP.id .. "-" .. APP.model.SERVICE_NAME)
+local _ok, _status, _started = _systemctl.safe_get_service_status(APP.id .. "-" .. APP.model.SERVICE_NAME)
 ami_assert(_ok, "Failed to start " .. APP.id .. "-" .. APP.model.SERVICE_NAME .. ".service " .. (_status or ""), EXIT_APP_START_ERROR)
 _info.snowgemd = _status
+_info.started = _started
 
 _info.level = "ok"
 _info.synced = "not reported"
