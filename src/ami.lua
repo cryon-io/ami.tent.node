@@ -11,7 +11,7 @@ return {
                 end
                 local _ok, _infoLua = pcall(loadfile, "__xsg/info.lua")
                 if not _ok then
-                    ami_error(_ok, "Failed to get info of XSG NODE - " .. _infoLua, EXIT_APP_INFO_ERROR)
+                    ami_error("Failed to get info of XSG NODE - " .. _infoLua, EXIT_APP_INFO_ERROR)
                 end
                 local _ok, _error = pcall(_infoLua, OUTPUT_FORMAT == "json")
                 ami_assert(_ok, "Failed to get info of XSG NODE - " .. (_error or ""), EXIT_APP_INFO_ERROR)
