@@ -82,6 +82,9 @@ if _info.snowgemd == "running" then
         _info.currentBlockHash = "unknown"
     end
 
+    local _exitcode = _exec_xsg_cli("getblocktemplate")
+    _info.synced = _exitcode == 0
+
 else
     _info.level = "error"
 end
