@@ -12,6 +12,7 @@ _info.started = _started
 
 _info.level = "ok"
 _info.synced = "not reported"
+_info.status = "XSG node down"
 
 local function _exec_xsg_cli(...)
 
@@ -58,7 +59,7 @@ local function _get_xsg_cli_result(exitcode, stdout, stderr)
 end
 
 if _info.snowgemd == "running" then
-    if APP.configuration.NODE_PRIVKEY ~= nil then 
+    if type(APP.configuration.DAEMON_CONFIGURATION) == "table" and tonumber(APP.configuration.DAEMON_CONFIGURATION.masternode) == 1 then 
         local _exitcode, _stdout, _stderr = _exec_xsg_cli("masternode", "status")
         local _success, _output = _get_xsg_cli_result(_exitcode, _stdout, _stderr)
 
@@ -69,6 +70,7 @@ if _info.snowgemd == "running" then
             _info.level = "error"
         end
     else 
+        _info.status = "XSG node up"
         _info.level = "ok"
     end
     local _exitcode, _stdout, _stderr = _exec_xsg_cli("getblockchaininfo")
@@ -84,7 +86,10 @@ if _info.snowgemd == "running" then
 
     local _exitcode = _exec_xsg_cli("getblocktemplate")
     _info.synced = _exitcode == 0
-
+    if _info.level == "ok" and not _info.synced then 
+        _info.level = "warn"
+        _info.status = "Syncing..."
+    end
 else
     _info.level = "error"
 end
