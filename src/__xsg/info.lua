@@ -58,40 +58,67 @@ local function _get_xsg_cli_result(exitcode, stdout, stderr)
     end
 end
 
+local function _update_info(update_function)
+    if _info.level ~= "ok" or type(update_function) ~= "function" then
+        return
+    end
+    update_function()
+end
+
 if _info.snowgemd == "running" then
-    if type(APP.configuration.DAEMON_CONFIGURATION) == "table" and tonumber(APP.configuration.DAEMON_CONFIGURATION.masternode) == 1 then 
-        local _exitcode, _stdout, _stderr = _exec_xsg_cli("masternode", "status")
-        local _success, _output = _get_xsg_cli_result(_exitcode, _stdout, _stderr)
+    local _checks = {
+        function () -- blockchain info check
+            local _exitcode, _stdout, _stderr = _exec_xsg_cli("getblockchaininfo")
+            local _success, _output = _get_xsg_cli_result(_exitcode, _stdout, _stderr)
 
-        _info.status = _output.message
-        if _success and _info.status == 'Masternode successfully started' then 
-            _info.level = "ok"
-        else
-            _info.level = "error"
+            if _success then
+                _info.currentBlock = _output.blocks
+                _info.currentBlockHash = _output.bestblockhash
+            else
+                _info.currentBlock = "unknown"
+                _info.currentBlockHash = "unknown"
+            end
+        end,
+        function () -- synchronization check
+            local _exitcode = _exec_xsg_cli("getblocktemplate")
+            _info.synced = _exitcode == 0
+            if not _info.synced then
+                _info.level = "warn"
+                _info.status = "Syncing..."
+            end
+        end,
+        function () -- masternode status check
+            if type(APP.configuration.DAEMON_CONFIGURATION) == "table" and tonumber(APP.configuration.DAEMON_CONFIGURATION.masternode) == 1 then
+                local _exitcode, _stdout, _stderr = _exec_xsg_cli("masternode", "debug")
+                if type(_stdout) ~= "string" then
+                    _stdout = ""
+                end
+                if type(_stderr) ~= "string" then
+                    _stderr = ""
+                end
+                if _stdout:match('Masternode successfully started') then
+                    _info.level = "ok"
+                    _info.status = "Masternode successfully started"
+                elseif _stdout:match('Hot node, waiting for remote activation') or _stderr:match('Hot node, waiting for remote activation') then
+                    _info.level = "warn"
+                    _info.status = 'Hot node, waiting for remote activation.'
+                else
+                    _info.level = "error"
+                    _info.status = _stderr:match("error message:.-\n(.-)\n%s*") or _stdout:match("error message:.-\n(.-)\n%s*") or "Failed to verify masternode status!"
+                end
+            else
+                _info.status = "XSG node up"
+                _info.level = "ok"
+            end
         end
-    else 
-        _info.status = "XSG node up"
-        _info.level = "ok"
-    end
-    local _exitcode, _stdout, _stderr = _exec_xsg_cli("getblockchaininfo")
-    local _success, _output = _get_xsg_cli_result(_exitcode, _stdout, _stderr)
+    }
 
-    if _success then 
-        _info.currentBlock = _output.blocks
-        _info.currentBlockHash = _output.bestblockhash
-    else 
-        _info.currentBlock = "unknown"
-        _info.currentBlockHash = "unknown"
-    end
-
-    local _exitcode = _exec_xsg_cli("getblocktemplate")
-    _info.synced = _exitcode == 0
-    if _info.level == "ok" and not _info.synced then 
-        _info.level = "warn"
-        _info.status = "Syncing..."
+    for _, check in ipairs(_checks) do
+        _update_info(check)
     end
 else
     _info.level = "error"
+    _info.status = "Node is not running!"
 end
 
 _info.version = get_app_version()
