@@ -11,15 +11,6 @@ _charset="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 _charset:gsub(".",function(c) table.insert(_charsetTable,c) end)
 local _rpcPass = eliUtil.random_string(20, _charsetTable)
 
-local _masternodeConf = eliUtil.merge_tables(APP.configuration.MASTERNODE_CONFIGURATION or {}, {
-    alias = APP.id,
-    ip = type(APP.configuration.DAEMON_CONFIGURATION) == 'table' and APP.configuration.DAEMON_CONFIGURATION.bind or APP.configuration.DAEMON_CONFIGURATION.externalip,
-    port = type(APP.configuration.port) == 'table' and APP.configuration.DAEMON_CONFIGURATION.port or 16113,
-    mnkey = APP.configuration.DAEMON_CONFIGURATION.masternodeprivkey
-})
-
-_masternodeConf.ip = type(_masternodeConf.ip) == "string" and string.match(_masternodeConf.ip, ":") and '[' .. _masternodeConf.ip .. ']' or _masternodeConf.ip
-
 APP.model = eliUtil.merge_tables(
     APP.model,
     {
@@ -31,7 +22,6 @@ APP.model = eliUtil.merge_tables(
             masternodeprivkey = APP.configuration.NODE_PRIVKEY,
             masternode = APP.configuration.NODE_PRIVKEY and 1,
         },
-        MASTERNODE_CONFIGURATION = _masternodeConf,
         DAEMON_NAME = "snowgemd",
         CLI_NAME = "snowgem-cli",
         CONF_NAME = "snowgem.conf",
