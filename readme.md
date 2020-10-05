@@ -12,25 +12,34 @@ SnowGem node AMI app.
 3. Create `app.json` or `app.hjson` with app configuration you like, e.g.:
 ```json
 {
-    "id": "xsg1",
-    "type": {
-        "id": "xsg.node"
-    },
+    "id": "xsg22",
+    "type": "xsg.node",
     "configuration": {
-        "NODE_PRIVKEY" : "xxxxxxxxxxxxxxxxxxxxxxxxx",
-        "RPC_USER": "yyyyy", 
-        "RPC_PASS": "xxxxxyyyyy",
-        "RPC_PORT": 16111,
         "DAEMON_CONFIGURATION": {
-            "externalip" : "127.0.0.1"
-        },
-        "MASTERNODE_CONFIGURATION" : {
-            ...
+            "bind": "aaa.bbb.ccc.ddd",
+            "rpcbind": "127.0.0.22",
+            "port": 16113,
+            "listen": 1,
+            "server": 1,
+            "txindex": 1,
+            "masternode": 1,
+            "rpcallowip": "127.0.0.0/8",
+            "masternodeprivkey": "5JM..........QYhRN"
         }
     },
-    "user": "xsg1", 
+    "user": "xsg1"
 }
 ```
+Above example is a config file for 22nd masternode. Depending on the node You have to change these lines:
+```
+ "id": "xsg22",
+ "bind": "aaa.bbb.ccc.ddd",
+ "rpcbind": "127.0.0.22",
+ "masternodeprivkey": "5JM..........QYhRN"
+ ```
+As You can see '22' appears in 'id' and 'rpcbind' IP. Of course each masternode uses different external IP and Private key ('masternodeprivkey'). 
+ 
+
 4. Run `ami --path=<your app path> setup`
    * e.g. `ami --path=/mns/xsg1`
 . Run `ami --path=<your app path> --help` to investigate available commands
