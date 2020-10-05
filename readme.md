@@ -27,16 +27,16 @@ SnowGem node AMI app.
             "masternodeprivkey": "5JM..........QYhRN"
         }
     }
-    "user": "xsg1"
-}
+    "user": "xsg1",
+}```
 Above example is a config file for 22nd masternode. Depending on the node You have to change these lines:
- "id": "xsg22",
+``` "id": "xsg22",
  "bind": "aaa.bbb.ccc.ddd",
  "rpcbind": "127.0.0.22",
- "masternodeprivkey": "5JM..........QYhRN"
+ "masternodeprivkey": "5JM..........QYhRN"```
 As You can see '22' appears in 'id' and 'rpcbin' IP. Of course each masternode uses different external IP and Private key ('masternodeprivkey'). 
  
-```
+
 4. Run `ami --path=<your app path> setup`
    * e.g. `ami --path=/mns/xsg1`
 . Run `ami --path=<your app path> --help` to investigate available commands
