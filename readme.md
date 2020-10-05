@@ -26,7 +26,7 @@ SnowGem node AMI app.
             "rpcallowip": "127.0.0.0/8",
             "masternodeprivkey": "5JM..........QYhRN"
         }
-    }
+    },
     "user": "xsg1"
 }
 ```
