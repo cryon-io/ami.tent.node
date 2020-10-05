@@ -28,7 +28,7 @@ SnowGem node AMI app.
             ...
         }
     },
-    "user": "xsg1", 
+    "user": "xsg1" 
 }
 ```
 4. Run `ami --path=<your app path> setup`
