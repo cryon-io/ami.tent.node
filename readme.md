@@ -66,6 +66,25 @@ As You can see '22' appears in 'id' and 'rpcbind' IP. Of course each masternode 
 2. `ami --path=<your app path> removedb`
 3. `ami --path=<your app path> start`
 
+#### Cloning masternode:
+1. Let's say we have one masternode in directory /mns/xsg1. We want to create another one in /mns/xsg2, so first we have to stop first masternode using command:
+`ami --path=/mns/xsg1 stop`
+2. We create a directory for masternode 2 using command:
+`mkdir /mns/xsg2`
+3. Next we copy all the files from /mns/xsg1 to /mns/xsg2 recursively:
+`cp -R /mns/xsg1/* /mns/xsg2`
+4. Then remember to edit app.json file in /mns/xsg2
+5. Rebuild configuration for new MN:
+`ami --path=/mns/xsg2 setup`
+6. Start new MN:
+`ami --path=/mns/xsg2 start`
+7. Don't forget to start source MN which we stopped in first step:
+`ami --path=/mns/xsg1 start`
+8. Check if both masternodes are running well:
+`ami --path=/mns/xsg1 info`
+`ami --path=/mns/xsg2 info`
+
+
 #### Troubleshooting 
 
 Run ami with `-ll=trace` to enable trace level printout, e.g.:
