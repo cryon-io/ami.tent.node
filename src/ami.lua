@@ -4,9 +4,9 @@ return {
         info = {
             description = "ami 'info' sub command",
             summary = "Prints runtime info and status of the app",
-            action = function(_options, command, args, cli)
+            action = function(_options, _, _, _cli)
                 if _options.help then
-                    show_cli_help(cli)
+                    show_cli_help(_cli)
                     return
                 end
                 local _ok, _infoLua = pcall(loadfile, "__xsg/info.lua")
@@ -23,12 +23,12 @@ return {
                     description = "Configures application, renders templates and installs services"
                 }
             },
-            action = function(options, command, args, cli)
-                if options.help then
-                    show_cli_help(cli)
+            action = function(_options, _, _, _cli)
+                if _options.help then
+                    show_cli_help(_cli)
                     return
                 end
-                local _noOptions = #eliUtil.keys(options) == 0
+                local _noOptions = #eliUtil.keys(_options) == 0
                 if _noOptions or _options.environment then
                     prepare_app(APP)
                 end
@@ -37,7 +37,7 @@ return {
                     process_cli(AMI, {"validate", "--platform"})
                 end
 
-                if _noOptions or options.app then
+                if _noOptions or _options.app then
                     local _ok, _error = pcall(dofile, "__btc/download-binaries.lua")
                     ami_assert(_ok, "Failed to download xsg binaries - " .. (_error or ""), EXIT_SETUP_ERROR)
                 end
@@ -46,7 +46,7 @@ return {
                     process_cli(AMI, {"validate", "--configuration"})
                 end
 
-                if _noOptions or options.configure then
+                if _noOptions or _options.configure then
                     render_templates(APP)
                     local _ok, _error = pcall(dofile, "__btc/configure.lua")
                     ami_assert(_ok, "Failed to configure services - " .. (_error or ""), EXIT_SETUP_ERROR)
@@ -59,9 +59,9 @@ return {
         start = {
             description = "ami 'start' sub command",
             summary = "Starts the XSG node",
-            action = function(options, command, args, cli)
-                if options.help then
-                    show_cli_help(cli)
+            action = function(_options, _, _, _cli)
+                if _options.help then
+                    show_cli_help(_cli)
                     return
                 end
                 local _ok, _error = pcall(dofile, "__btc/start.lua")
@@ -71,9 +71,9 @@ return {
         stop = {
             description = "ami 'stop' sub command",
             summary = "Stops the XSG node",
-            action = function(options, command, args, cli)
-                if options.help then
-                    show_cli_help(cli)
+            action = function(_options, _, _, _cli)
+                if _options.help then
+                    show_cli_help(_cli)
                     return
                 end
                 local _ok, _error = pcall(dofile, "__btc/stop.lua")
@@ -83,9 +83,9 @@ return {
         validate = {
             description = "ami 'validate' sub command",
             summary = "Validates app configuration and platform support",
-            action = function(_options, command, args, cli)
+            action = function(_options, _, _, _cli)
                 if _options.help then
-                    show_cli_help(cli)
+                    show_cli_help(_cli)
                     return
                 end
                 -- //TODO: Validate platform
@@ -111,9 +111,9 @@ return {
         about = {
             description = "ami 'about' sub command",
             summary = "Prints information about application",
-            action = function(_options, command, args, cli)
+            action = function(_options, _, _, _cli)
                 if _options.help then
-                    show_cli_help(cli)
+                    show_cli_help(_cli)
                     return
                 end
 
@@ -137,9 +137,9 @@ return {
             options = {
                 help = HELP_OPTION
             },
-            action = function(_options, command, args, cli)
+            action = function(_options, _, _, _cli)
                 if _options.help then
-                    show_cli_help(cli)
+                    show_cli_help(_cli)
                     return
                 end
                 local _ok, _error = pcall(dofile, "__btc/removedb.lua")
@@ -149,9 +149,9 @@ return {
         },
         remove = {
             index = 7,
-            action = function(_options, command, args, cli)
+            action = function(_options, _, _, _cli)
                 if _options.help then
-                    show_cli_help(cli)
+                    show_cli_help(_cli)
                     return
                 end
 

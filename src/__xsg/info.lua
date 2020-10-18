@@ -2,11 +2,11 @@ local _json = ...
 local _hjson = require"hjson"
 
 local _ok, _systemctl = safe_load_plugin("systemctl")
-ami_assert(_ok, "Failed to load systemctl plugin", EXIT_APP_START_ERROR)
+ami_assert(_ok, "Failed to load systemctl plugin", EXIT_PLUGIN_LOAD_ERROR)
 
 local _info = {}
 local _ok, _status, _started = _systemctl.safe_get_service_status(APP.id .. "-" .. APP.model.SERVICE_NAME)
-ami_assert(_ok, "Failed to start " .. APP.id .. "-" .. APP.model.SERVICE_NAME .. ".service " .. (_status or ""), EXIT_APP_START_ERROR)
+ami_assert(_ok, "Failed to start " .. APP.id .. "-" .. APP.model.SERVICE_NAME .. ".service " .. (_status or ""), EXIT_PLUGIN_EXEC_ERROR)
 _info.snowgemd = _status
 _info.started = _started
 
