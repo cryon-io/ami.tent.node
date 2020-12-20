@@ -32,7 +32,7 @@ local function _exec_xsg_cli(...)
         _rderr:close()
         ami_error("Failed to execute snowgem-cli command: " .. _cmd, EXIT_APP_INTERNAL_ERROR)
     end
-    local _exitcode = _proc:wait() 
+    local _exitcode = _proc:wait()
     local _stdout = _rd:read("a")
     local _stderr = _rderr:read("a")
     --ami_assert(_exitcode == 0, "Failed to execute snowgem-cli command: " .. _cmd, EXIT_APP_INTERNAL_ERROR)
@@ -40,20 +40,20 @@ local function _exec_xsg_cli(...)
 end
 
 local function _get_xsg_cli_result(exitcode, stdout, stderr)
-    if exitcode ~= 0 then 
+    if exitcode ~= 0 then
         local _errorInfo = stderr:match("error: (.*)")
         local _ok, _output = pcall(_hjson.parse, _errorInfo)
-        if _ok then 
+        if _ok then
             return false, _output
-        else 
+        else
             return false, { message = "unknown (internal error)" }
         end
     end
-    
+
     local _ok, _output = pcall(_hjson.parse, stdout)
-    if _ok then 
+    if _ok then
         return true, _output
-    else 
+    else
         return false, { message = "unknown (internal error)" }
     end
 end
@@ -80,11 +80,26 @@ if _info.snowgemd == "running" then
             end
         end,
         function () -- synchronization check
-            local _exitcode = _exec_xsg_cli("getblocktemplate")
-            _info.synced = _exitcode == 0
-            if not _info.synced then
+            local _exitcode, _stdout, stderr = _exec_xsg_cli("getblockchainsyncstatus")
+            local _success, _output = _get_xsg_cli_result(_exitcode, _stdout, _stderr)
+
+            if _success then
+                if _output.IsBlockchainSync = true
+                    _info.level = "ok"
+                    _info.status = "Synced"
+                else
+                    _info.level = "warn"
+                    _info.status = "Syncing..."
+                end
+            elseif _stderr:match('Snowgem is not connected!') then
                 _info.level = "warn"
-                _info.status = "Syncing..."
+                _info.status = "Snowgem is not connected!"
+            elseif _stderr:match('Snowgem is downloading blocks...') then
+                _info.level = "warn"
+                _info.status = "Snowgem is downloading blocks..."
+            else
+                _info.level = "warn"
+                _info.status = "Unknown error..."
             end
         end,
         function () -- masternode status check
@@ -102,6 +117,9 @@ if _info.snowgemd == "running" then
                 elseif _stdout:match('Hot node, waiting for remote activation') or _stderr:match('Hot node, waiting for remote activation') then
                     _info.level = "warn"
                     _info.status = 'Hot node, waiting for remote activation.'
+                elseif _stdout:match('Node just started, not yet activated') or _stderr:match('Node just started, not yet activated') then
+                    _info.level = "warn"
+                    _info.status = 'Node just started, not yet activated'
                 else
                     _info.level = "error"
                     _info.status = _stderr:match("error message:.-\n(.-)\n%s*") or _stdout:match("error message:.-\n(.-)\n%s*") or "Failed to verify masternode status!"
