@@ -85,7 +85,6 @@ if _info.snowgemd == "running" then
 
             if _success then
                 if _output.IsBlockchainSync = true
-                    _info.level = "ok"
                     _info.status = "Synced"
                 else
                     _info.level = "warn"
@@ -112,7 +111,6 @@ if _info.snowgemd == "running" then
                     _stderr = ""
                 end
                 if _stdout:match('Masternode successfully started') then
-                    _info.level = "ok"
                     _info.status = "Masternode successfully started"
                 elseif _stdout:match('Hot node, waiting for remote activation') or _stderr:match('Hot node, waiting for remote activation') then
                     _info.level = "warn"
@@ -126,7 +124,6 @@ if _info.snowgemd == "running" then
                 end
             else
                 _info.status = "XSG node up"
-                _info.level = "ok"
             end
         end
     }
