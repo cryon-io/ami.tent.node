@@ -16,7 +16,7 @@ APP.model =
         CONF_NAME = "snowgem.conf",
         CONF_SOURCE = "__btc/assets/daemon.conf",
         MN_CONF_NAME = "masternode.conf",
-        MN_CONF_SOURCE = "__xsg/assets/masternode.conf",
+        MN_CONF_SOURCE = "__tent/assets/masternode.conf",
         SERVICE_NAME = "snowgemd",
         DATA_DIR = "data"
     },

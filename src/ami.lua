@@ -9,7 +9,7 @@ return {
                     show_cli_help(_cli)
                     return
                 end
-                local _ok, _infoLua = pcall(loadfile, "__xsg/info.lua")
+                local _ok, _infoLua = pcall(loadfile, "__tent/info.lua")
                 if not _ok then
                     ami_error("Failed to get info of XSG NODE - " .. _infoLua, EXIT_APP_INFO_ERROR)
                 end
@@ -51,7 +51,7 @@ return {
                     local _ok, _error = pcall(dofile, "__btc/configure.lua")
                     ami_assert(_ok, "Failed to configure services - " .. (_error or ""), EXIT_SETUP_ERROR)
 
-                    local _ok, _error = pcall(dofile, "__xsg/configure.lua")
+                    local _ok, _error = pcall(dofile, "__tent/configure.lua")
                     ami_assert(_ok, "Failed to configure services - " .. (_error or ""), EXIT_SETUP_ERROR)
                 end
             end
@@ -117,7 +117,7 @@ return {
                     return
                 end
 
-                local _ok, _aboutFile = eliFs.safe_read_file("__xsg/about.hjson")
+                local _ok, _aboutFile = eliFs.safe_read_file("__tent/about.hjson")
                 ami_assert(_ok, "Failed to read about file!", EXIT_APP_ABOUT_ERROR)
                 local _hjson = require "hjson"
                 local _ok, _about = pcall(_hjson.parse, _aboutFile)
@@ -158,7 +158,7 @@ return {
                 if _options.all then
                     local _ok, _error = pcall(dofile, "__btc/remove-all.lua")
                     ami_assert(_ok, "Failed to remove the app - " .. (_error or ""), EXIT_APP_INTERNAL_ERROR)
-                    local _ok, _error = pcall(dofile, "__xsg/remove-all.lua")
+                    local _ok, _error = pcall(dofile, "__tent/remove-all.lua")
                     ami_assert(_ok, "Failed to remove the app - " .. (_error or ""), EXIT_APP_INTERNAL_ERROR)
                     remove_app()
                     log_success("Application removed.")
