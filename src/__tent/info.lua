@@ -84,7 +84,7 @@ if _info.snowgemd == "running" then
             local _success, _output = _get_xsg_cli_result(_exitcode, _stdout, _stderr)
 
             if _success then
-                if _output.IsBlockchainSync = true
+                if _output.IsBlockchainSync == true then
                     _info.status = "Synced"
                 else
                     _info.level = "warn"

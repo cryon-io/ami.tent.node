@@ -1,8 +1,8 @@
 {
-    "id": "xsg.node" ,
+    "id": "tent.node" ,
     "version" : "0.2.1",
     "dependencies": [
         { "id":"btc.base" },
-        { "id": "xsg.binaries"}
+        { "id": "tent.binaries"}
     ]
 }
