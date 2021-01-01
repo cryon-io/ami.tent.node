@@ -8,8 +8,7 @@ APP.model =
                 listen = (type(APP.configuration.NODE_PRIVKEY) == "string" or APP.configuration.SERVER) and 1 or nil,
                 masternodeprivkey = APP.configuration.NODE_PRIVKEY,
                 masternode = APP.configuration.NODE_PRIVKEY and 1
-            },
-            _daemonConfiguration
+            }
         ),
         DAEMON_NAME = "snowgemd",
         CLI_NAME = "snowgem-cli",
