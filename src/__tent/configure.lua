@@ -1,4 +1,4 @@
-local _user = APP.user
+local _user = am.app.get("user")
 ami_assert(type(_user) == "string", "User not specified...")
 
 local _ok, _apt = safe_load_plugin("apt")
@@ -11,46 +11,28 @@ if not _ok then
     log_warn("Failed to install " .. (_dep or '-').. "! - " .. _error)
 end
 
-local DATA_PATH = APP.model.DATA_DIR
-local _ok, _error = eliFs.safe_mkdirp(DATA_PATH)
+local DATA_PATH = am.app.get_model("DATA_DIR", "data")
+fs.safe_mkdirp(DATA_PATH)
 
-local _confDest = eliPath.combine(DATA_PATH, APP.model.MN_CONF_NAME)
-local _ok, _error = eliFs.safe_copy_file(APP.model.MN_CONF_SOURCE, _confDest)
-ami_assert(_ok, "Failed to deploy " .. APP.model.MN_CONF_NAME .. ": " .. (_error or ""))
+local _confDest = path.combine(DATA_PATH, am.app.get_model("MN_CONF_NAME"))
+local _ok, _error = fs.safe_copy_file(am.app.get_model("MN_CONF_SOURCE"), _confDest)
+ami_assert(_ok, "Failed to deploy " .. am.app.get_model("MN_CONF_NAME", "unidentified") .. ": " .. (_error or ""))
 
 local _fetchScriptPath = "bin/fetch-params.sh"
-local _ok, _error = eliNet.safe_download_file("https://raw.githubusercontent.com/Snowgem/Snowgem/master/zcutil/fetch-params.sh", _fetchScriptPath, {followRedirects = true})
+local _ok, _error = net.safe_download_file("https://raw.githubusercontent.com/Snowgem/Snowgem/master/zcutil/fetch-params.sh", _fetchScriptPath, {followRedirects = true})
 if not _ok then 
     log_error("Failed to download fetch-params.sh - " .. (_error or '-').. "!")
     return
 end
 
-local function _download_params()
-    local _rd, _proc_wr = eliFs.pipe()
-    local _rderr, _proc_werr = eliFs.pipe()
-    local _ok, _env = eliEnv.safe_environment()
-    if not _ok then
-        ami_error("Failed to get env variables " .. (_env or ""), EXIT_APP_CONFIGURE_ERROR)
-    end
-    _env.HOME = "/home/" .. _user
-
-    local _proc, _err = eliProc.spawn {"/bin/bash", args = { _fetchScriptPath }, stdout = _proc_wr, stderr = _proc_werr, env = _env}
-    _proc_wr:close()
-    _proc_werr:close()
-
-    if not _proc then
-        _rd:close()
-        _rderr:close()
-        ami_error("Failed to fetch params", EXIT_APP_INTERNAL_ERROR)
-    end
-    local _exitcode = _proc:wait()
-    local _stdout = _rd:read("a")
-    local _stderr = _rderr:read("a")
-    ami_assert(_exitcode == 0, "Failed to fetch params: " .. _stderr, EXIT_APP_CONFIGURE_ERROR)
-end
-
-if eliFs.exists(_fetchScriptPath) then -- we download only on debian
+if fs.exists(_fetchScriptPath) then -- we download only on debian
     log_info("Downloading params... (This may take few minutes.)")
+    local _proc = proc.spawn("/bin/bash", { _fetchScriptPath }, {
+        stdio = { stderr = "pipe" },
+        wait = true,
+        env = { HOME = "/home/" .. _user }
+    })
+    ami_assert(_exitcode == 0, "Failed to fetch params: " .. _proc.stderrStream:read("a"))
     _download_params()
     log_success("Sprout parameters downloaded...")
 end

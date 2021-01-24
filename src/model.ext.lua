@@ -1,16 +1,11 @@
-APP.model =
-    eliUtil.merge_tables(
-    APP.model,
+am.app.set_model(
     {
-        DAEMON_CONFIGURATION = eliUtil.merge_tables(
-            {
-                server = (type(APP.configuration.NODE_PRIVKEY) == "string" or APP.configuration.SERVER) and 1 or nil,
-                listen = (type(APP.configuration.NODE_PRIVKEY) == "string" or APP.configuration.SERVER) and 1 or nil,
-                masternodeprivkey = APP.configuration.NODE_PRIVKEY,
-                masternode = APP.configuration.NODE_PRIVKEY and 1
-            },
-            _daemonConfiguration
-        ),
+        DAEMON_CONFIGURATION = {
+            server = (type(am.app.get_config("NODE_PRIVKEY") == "string") or am.app.get_config("SERVER")) and 1 or nil,
+            listen = (type(am.app.get_config("NODE_PRIVKEY") == "string") or am.app.get_config("SERVER")) and 1 or nil,
+            masternodeprivkey = am.app.get_config("NODE_PRIVKEY"),
+            masternode = am.app.get_config("NODE_PRIVKEY") and 1
+        },
         DAEMON_NAME = "snowgemd",
         CLI_NAME = "snowgem-cli",
         CONF_NAME = "snowgem.conf",
@@ -20,5 +15,5 @@ APP.model =
         SERVICE_NAME = "snowgemd",
         DATA_DIR = "data"
     },
-    true
+    { merge = true, overwrite = true }
 )

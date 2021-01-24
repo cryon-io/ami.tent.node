@@ -1,55 +1,49 @@
-local _json = ...
-local _hjson = require "hjson"
+local _json = am.options.OUTPUT_FORMAT == "json"
 
-local _ok, _systemctl = safe_load_plugin("systemctl")
+local _ok, _systemctl = am.plugin.safe_get("systemctl")
 ami_assert(_ok, "Failed to load systemctl plugin", EXIT_PLUGIN_LOAD_ERROR)
 
-local _ok, _status, _started = _systemctl.safe_get_service_status(APP.id .. "-" .. APP.model.SERVICE_NAME)
-ami_assert(_ok, "Failed to start " .. APP.id .. "-" .. APP.model.SERVICE_NAME .. ".service " .. (_status or ""), EXIT_PLUGIN_EXEC_ERROR)
+local _appId = am.app.get("id", "unknown")
+local _serviceName = am.app.get_model("SERVICE_NAME", "unknown")
+local _ok, _status, _started = _systemctl.safe_get_service_status(_appId .. "-" .. _serviceName)
+ami_assert(_ok, "Failed to start " .. _appId .. "-" .. _serviceName .. ".service " .. (_status or ""), EXIT_PLUGIN_EXEC_ERROR)
 
 local _info = {
     snowgemd = _status,
     started = _started,
     level = "ok",
     synced = "not reported",
-    status = "XSG node down"
+    status = "XSG node down",
+    version = am.app.get_version(),
+    type = am.app.get_type()
 }
 
 local function _exec_xsg_cli(...)
     local arg = {"-datadir=data", ...}
-    if type(APP.configuration.DAEMON_CONFIGURATION) == "table" and type(APP.configuration.DAEMON_CONFIGURATION.rpcbind) == "string" then
-        table.insert(arg, 1, "-rpcconnect=" .. APP.configuration.DAEMON_CONFIGURATION.rpcbind)
+    local _rpcBind = am.app.get_config({"DAEMON_CONFIGURATION", "rpcbind"})
+    if type(_rpcBind) == "string" then
+        table.insert(arg, 1, "-rpcconnect=" .. _rpcBind)
     end
-    local _cmd = exString.join_strings(" ", table.unpack(arg))
-    local _rd, _proc_wr = eliFs.pipe()
-    local _rderr, _proc_werr = eliFs.pipe()
-    local _proc, _err = eliProc.spawn {"bin/snowgem-cli", args = arg, stdout = _proc_wr, stderr = _proc_werr}
-    _proc_wr:close()
-    _proc_werr:close()
+    local _cmd = string.join_strings(" ", table.unpack(arg))
+    local _proc = proc.spawn("bin/snowgem-cli", arg, { stdio = { stdout = "pipe", stderr = "pipe" }, wait = true})
 
-    if not _proc then
-        _rd:close()
-        _rderr:close()
-        ami_error("Failed to execute snowgem-cli command: " .. _cmd, EXIT_APP_INTERNAL_ERROR)
-    end
-    local _exitcode = _proc:wait()
-    local _stdout = _rd:read("a")
-    local _stderr = _rderr:read("a")
-    --ami_assert(_exitcode == 0, "Failed to execute snowgem-cli command: " .. _cmd, EXIT_APP_INTERNAL_ERROR)
+    local _exitcode = _proc.exitcode
+    local _stdout = _proc.stdoutStream:read("a") or ""
+    local _stderr = _proc.stderrStream:read("a") or ""
     return _exitcode, _stdout, _stderr
 end
 
 local function _get_xsg_cli_result(exitcode, stdout, stderr)
     if exitcode ~= 0 then
         local _errorInfo = stderr:match("error: (.*)")
-        local _ok, _output = pcall(_hjson.parse, _errorInfo)
+        local _ok, _output = hjson.safe_parse(_errorInfo)
         if _ok then
             return false, _output
         end
         return false, {message = "unknown (internal error)"}
     end
 
-    local _ok, _output = pcall(_hjson.parse, stdout)
+    local _ok, _output = hjson.safe_parse(stdout)
     if _ok then
         return true, _output
     end
@@ -99,7 +93,7 @@ if _info.snowgemd == "running" then
         end,
         function()
             -- masternode status check
-            if type(APP.configuration.DAEMON_CONFIGURATION) == "table" and tonumber(APP.configuration.DAEMON_CONFIGURATION.masternode) == 1 then
+            if am.app.get_config({"DAEMON_CONFIGURATION", "masternode"}) == 1 then
                 local _, _stdout, _stderr = _exec_xsg_cli("masternode", "debug")
                 if type(_stdout) ~= "string" then
                     _stdout = ""
@@ -138,11 +132,8 @@ else
     _info.status = "Node is not running!"
 end
 
-_info.version = get_app_version()
-_info.type = APP.type.id
-
 if _json then
-    print(_hjson.stringify_to_json(_info, {indent = false}))
+    print(hjson.stringify_to_json(_info, {indent = false}))
 else
-    print(_hjson.stringify(_info))
+    print(hjson.stringify(_info))
 end

@@ -1,21 +1,13 @@
+local _amiId = "TENT node"
+
 return {
-    title = "XSG Masternode",
+    title = _amiId,
     commands = {
         info = {
             description = "ami 'info' sub command",
             summary = "Prints runtime info and status of the app",
-            action = function(_options, _, _, _cli)
-                if _options.help then
-                    show_cli_help(_cli)
-                    return
-                end
-                local _ok, _infoLua = pcall(loadfile, "__tent/info.lua")
-                if not _ok then
-                    ami_error("Failed to get info of XSG NODE - " .. _infoLua, EXIT_APP_INFO_ERROR)
-                end
-                local _ok, _error = pcall(_infoLua, OUTPUT_FORMAT == "json")
-                ami_assert(_ok, "Failed to get info of XSG NODE - " .. (_error or ""), EXIT_APP_INFO_ERROR)
-            end
+            action = "__tent/info.lua",
+            contextFailExitCode = EXIT_APP_INFO_ERROR
         },
         setup = {
             options = {
@@ -24,84 +16,62 @@ return {
                 }
             },
             action = function(_options, _, _, _cli)
-                if _options.help then
-                    show_cli_help(_cli)
-                    return
-                end
-                local _noOptions = #eliUtil.keys(_options) == 0
+                local _noOptions = #util.keys(_options) == 0
                 if _noOptions or _options.environment then
-                    prepare_app(APP)
+                    am.app.prepare()
                 end
 
                 if _noOptions or not _options["no-validate"] then
-                    process_cli(AMI, {"validate", "--platform"})
+                    am.execute("validate", {"--platform"})
                 end
 
                 if _noOptions or _options.app then
-                    local _ok, _error = pcall(dofile, "__btc/download-binaries.lua")
-                    ami_assert(_ok, "Failed to download xsg binaries - " .. (_error or ""), EXIT_SETUP_ERROR)
+                    am.execute_extension("__btc/download-binaries.lua", { contextFailExitCode = EXIT_SETUP_ERROR })
                 end
 
-                if _noOptions or not _options["no-validate"] then
-                    process_cli(AMI, {"validate", "--configuration"})
+                if _noOptions and not _options["no-validate"] then
+                    am.execute("validate", {"--configuration"})
                 end
 
                 if _noOptions or _options.configure then
-                    render_templates(APP)
-                    local _ok, _error = pcall(dofile, "__btc/configure.lua")
-                    ami_assert(_ok, "Failed to configure services - " .. (_error or ""), EXIT_SETUP_ERROR)
+                    am.app.render()
 
-                    local _ok, _error = pcall(dofile, "__tent/configure.lua")
-                    ami_assert(_ok, "Failed to configure services - " .. (_error or ""), EXIT_SETUP_ERROR)
+                    am.execute_extension("__btc/configure.lua", { contextFailExitCode = EXIT_APP_CONFIGURE_ERROR })
+                    am.execute_extension("__tent/configure.lua", { contextFailExitCode = EXIT_APP_CONFIGURE_ERROR })
                 end
             end
         },
         start = {
             description = "ami 'start' sub command",
             summary = "Starts the XSG node",
-            action = function(_options, _, _, _cli)
-                if _options.help then
-                    show_cli_help(_cli)
-                    return
-                end
-                local _ok, _error = pcall(dofile, "__btc/start.lua")
-                ami_assert(_ok, "Failed to start XSG NODE - " .. (_error or ""), EXIT_APP_START_ERROR)
-            end
+            type = "extension",
+            action = "__btc/start.lua",
+            contextFailExitCode = EXIT_APP_START_ERROR
         },
         stop = {
             description = "ami 'stop' sub command",
             summary = "Stops the XSG node",
-            action = function(_options, _, _, _cli)
-                if _options.help then
-                    show_cli_help(_cli)
-                    return
-                end
-                local _ok, _error = pcall(dofile, "__btc/stop.lua")
-                ami_assert(_ok, "Failed to stop XSG NODE - " .. (_error or ""), EXIT_APP_START_ERROR)
-            end
+            action = "__btc/stop.lua",
+            contextFailExitCode = EXIT_APP_STOP_ERROR
         },
         validate = {
             description = "ami 'validate' sub command",
             summary = "Validates app configuration and platform support",
             action = function(_options, _, _, _cli)
-                if _options.help then
-                    show_cli_help(_cli)
-                    return
-                end
                 -- //TODO: Validate platform
                 -- //TODO: add switches
-                ami_assert(eliProc.EPROC, "xsg node AMI requires extra api - eli.proc.extra", EXIT_MISSING_API)
-                ami_assert(eliFs.EFS, "xsg node AMI requires extra api - eli.fs.extra", EXIT_MISSING_API)
+                ami_assert(proc.EPROC, "xsg node AMI requires extra api - eli.proc.extra", EXIT_MISSING_API)
+                ami_assert(fs.EFS, "xsg node AMI requires extra api - eli.fs.extra", EXIT_MISSING_API)
 
-                ami_assert(type(APP.id) == "string", "id not specified!", EXIT_INVALID_CONFIGURATION)
+                ami_assert(type(am.app.get("id")) == "string", "id not specified!", EXIT_INVALID_CONFIGURATION)
                 ami_assert(
-                    type(APP.configuration) == "table",
+                    type(am.app.get_config()) == "table",
                     "configuration not found in app.h/json!",
                     EXIT_INVALID_CONFIGURATION
                 )
-                ami_assert(type(APP.user) == "string", "USER not specified!", EXIT_INVALID_CONFIGURATION)
+                ami_assert(type(am.app.get("user")) == "string", "USER not specified!", EXIT_INVALID_CONFIGURATION)
                 ami_assert(
-                    type(APP.type) == "table" or type(APP.type) == "string",
+                    type(am.app.get_type()) == "table" or type(am.app.get_type()) == "string",
                     "Invalid app type!",
                     EXIT_INVALID_CONFIGURATION
                 )
@@ -112,21 +82,16 @@ return {
             description = "ami 'about' sub command",
             summary = "Prints information about application",
             action = function(_options, _, _, _cli)
-                if _options.help then
-                    show_cli_help(_cli)
-                    return
-                end
-
-                local _ok, _aboutFile = eliFs.safe_read_file("__tent/about.hjson")
+                local _ok, _aboutFile = fs.safe_read_file("__tent/about.hjson")
                 ami_assert(_ok, "Failed to read about file!", EXIT_APP_ABOUT_ERROR)
-                local _hjson = require "hjson"
-                local _ok, _about = pcall(_hjson.parse, _aboutFile)
-                _about["App Type"] = type(APP.type) == "table" and APP.type.id or APP.type
+
+                local _ok, _about = hjson.safe_parse(_aboutFile)
+                _about["App Type"] = am.app.get({"type", "id"}, am.app.get("type"))
                 ami_assert(_ok, "Failed to parse about file!", EXIT_APP_ABOUT_ERROR)
-                if OUTPUT_FORMAT == "json" then
-                    print(_hjson.stringify_to_json(_about, {indent = false, skipkeys = true}))
+                if am.options.OUTPUT_FORMAT == "json" then
+                    print(hjson.stringify_to_json(_about, {indent = false, skipkeys = true}))
                 else
-                    print(_hjson.stringify(_about))
+                    print(hjson.stringify(_about))
                 end
             end
         },
@@ -137,33 +102,19 @@ return {
             options = {
                 help = HELP_OPTION
             },
-            action = function(_options, _, _, _cli)
-                if _options.help then
-                    show_cli_help(_cli)
-                    return
-                end
-                local _ok, _error = pcall(dofile, "__btc/removedb.lua")
-                ami_assert(_ok, "Failed to removedb - " .. (_error or ""), EXIT_APP_INTERNAL_ERROR)
-                log_success("Succesfully removed snowgemd database.")
-            end
+            action = "__btc/removedb.lua",
+            contextFailExitCode = EXIT_RM_DATA_ERROR
         },
         remove = {
             index = 7,
             action = function(_options, _, _, _cli)
-                if _options.help then
-                    show_cli_help(_cli)
-                    return
-                end
-
                 if _options.all then
-                    local _ok, _error = pcall(dofile, "__btc/remove-all.lua")
-                    ami_assert(_ok, "Failed to remove the app - " .. (_error or ""), EXIT_APP_INTERNAL_ERROR)
-                    local _ok, _error = pcall(dofile, "__tent/remove-all.lua")
-                    ami_assert(_ok, "Failed to remove the app - " .. (_error or ""), EXIT_APP_INTERNAL_ERROR)
-                    remove_app()
+                    am.execute_extension("__btc/remove-all.lua", { contextFailExitCode = EXIT_RM_ERROR })
+                    am.execute_extension("__tent/remove-all.lua", { contextFailExitCode = EXIT_RM_ERROR })
+                    am.app.remove()
                     log_success("Application removed.")
                 else
-                    remove_app_data()
+                    am.app.remove_data()
                     log_success("Application data removed.")
                 end
                 return
