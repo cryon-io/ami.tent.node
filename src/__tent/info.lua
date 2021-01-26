@@ -13,12 +13,12 @@ local _info = {
     started = _started,
     level = "ok",
     synced = "not reported",
-    status = "XSG node down",
+    status = "TENT node down",
     version = am.app.get_version(),
     type = am.app.get_type()
 }
 
-local function _exec_xsg_cli(...)
+local function _exec_tent_cli(...)
     local arg = {"-datadir=data", ...}
     local _rpcBind = am.app.get_config({"DAEMON_CONFIGURATION", "rpcbind"})
     if type(_rpcBind) == "string" then
@@ -33,7 +33,7 @@ local function _exec_xsg_cli(...)
     return _exitcode, _stdout, _stderr
 end
 
-local function _get_xsg_cli_result(exitcode, stdout, stderr)
+local function _get_tent_cli_result(exitcode, stdout, stderr)
     if exitcode ~= 0 then
         local _errorInfo = stderr:match("error: (.*)")
         local _ok, _output = hjson.safe_parse(_errorInfo)
@@ -61,16 +61,16 @@ if _info.snowgemd == "running" then
     local _checks = {
         function()
             -- blockchain info check
-            local _exitcode, _stdout, _stderr = _exec_xsg_cli("getblockchaininfo")
-            local _success, _output = _get_xsg_cli_result(_exitcode, _stdout, _stderr)
+            local _exitcode, _stdout, _stderr = _exec_tent_cli("getblockchaininfo")
+            local _success, _output = _get_tent_cli_result(_exitcode, _stdout, _stderr)
 
             _info.currentBlock = _success and _output.blocks or "unknown"
             _info.currentBlockHash = _success and _output.bestblockhash or "unknown"
         end,
         function()
             -- synchronization check
-            local _exitcode, _stdout, _stderr = _exec_xsg_cli("getblockchainsyncstatus")
-            local _success, _output = _get_xsg_cli_result(_exitcode, _stdout, _stderr)
+            local _exitcode, _stdout, _stderr = _exec_tent_cli("getblockchainsyncstatus")
+            local _success, _output = _get_tent_cli_result(_exitcode, _stdout, _stderr)
 
             if _success then
                 if _output.IsBlockchainSync == true then
@@ -94,7 +94,7 @@ if _info.snowgemd == "running" then
         function()
             -- masternode status check
             if am.app.get_config({"DAEMON_CONFIGURATION", "masternode"}) == 1 then
-                local _, _stdout, _stderr = _exec_xsg_cli("masternode", "debug")
+                local _, _stdout, _stderr = _exec_tent_cli("masternode", "debug")
                 if type(_stdout) ~= "string" then
                     _stdout = ""
                 end
@@ -119,7 +119,7 @@ if _info.snowgemd == "running" then
                     _stdout:match("error message:.-\n(.-)\n%s*") or
                     "Failed to verify masternode status!"
             else
-                _info.status = "XSG node up"
+                _info.status = "TENT node up"
             end
         end
     }

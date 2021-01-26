@@ -43,14 +43,14 @@ return {
         },
         start = {
             description = "ami 'start' sub command",
-            summary = "Starts the XSG node",
+            summary = "Starts the TENT node",
             type = "extension",
             action = "__btc/start.lua",
             contextFailExitCode = EXIT_APP_START_ERROR
         },
         stop = {
             description = "ami 'stop' sub command",
-            summary = "Stops the XSG node",
+            summary = "Stops the TENT node",
             action = "__btc/stop.lua",
             contextFailExitCode = EXIT_APP_STOP_ERROR
         },
@@ -60,8 +60,8 @@ return {
             action = function(_options, _, _, _cli)
                 -- //TODO: Validate platform
                 -- //TODO: add switches
-                ami_assert(proc.EPROC, "xsg node AMI requires extra api - eli.proc.extra", EXIT_MISSING_API)
-                ami_assert(fs.EFS, "xsg node AMI requires extra api - eli.fs.extra", EXIT_MISSING_API)
+                ami_assert(proc.EPROC, "TENT node AMI requires extra api - eli.proc.extra", EXIT_MISSING_API)
+                ami_assert(fs.EFS, "TENT node AMI requires extra api - eli.fs.extra", EXIT_MISSING_API)
 
                 ami_assert(type(am.app.get("id")) == "string", "id not specified!", EXIT_INVALID_CONFIGURATION)
                 ami_assert(
@@ -75,7 +75,7 @@ return {
                     "Invalid app type!",
                     EXIT_INVALID_CONFIGURATION
                 )
-                log_success("XSG masternode configuration validated.")
+                log_success("TENT masternode configuration validated.")
             end
         },
         about = {

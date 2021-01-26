@@ -1,7 +1,7 @@
 local _user = am.app.get("user")
 ami_assert(type(_user) == "string", "User not specified...")
 
-local _ok, _apt = safe_load_plugin("apt")
+local _ok, _apt = am.plugin.safe_get("apt")
 if not _ok then
     log_warn("Failed to load apt plugin!")
 end
@@ -32,7 +32,7 @@ if fs.exists(_fetchScriptPath) then -- we download only on debian
         wait = true,
         env = { HOME = "/home/" .. _user }
     })
-    ami_assert(_exitcode == 0, "Failed to fetch params: " .. _proc.stderrStream:read("a"))
-    _download_params()
+    ami_assert(_proc.exitcode == 0, "Failed to fetch params: " .. _proc.stderrStream:read("a"))
     log_success("Sprout parameters downloaded...")
 end
+log_success("TENT configuration complete.")
