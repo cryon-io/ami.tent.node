@@ -2,7 +2,7 @@ local _user = am.app.get("user")
 ami_assert(type(_user) == "string", "User not specified...")
 
 local _ok, _apt = safe_load_plugin("apt")
-if not _ok then 
+if not _ok then
     log_warn("Failed to load apt plugin!")
 end
 
