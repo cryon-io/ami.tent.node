@@ -39,6 +39,7 @@ return {
                     am.execute_extension("__btc/configure.lua", { contextFailExitCode = EXIT_APP_CONFIGURE_ERROR })
                     am.execute_extension("__tent/configure.lua", { contextFailExitCode = EXIT_APP_CONFIGURE_ERROR })
                 end
+                log_success("TENT node setup complete.")
             end
         },
         start = {

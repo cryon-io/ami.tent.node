@@ -35,4 +35,3 @@ if fs.exists(_fetchScriptPath) then -- we download only on debian
     ami_assert(_proc.exitcode == 0, "Failed to fetch params: " .. _proc.stderrStream:read("a"))
     log_success("Sprout parameters downloaded...")
 end
-log_success("TENT configuration complete.")
