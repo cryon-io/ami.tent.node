@@ -12,7 +12,7 @@ local _info = {
     snowgemd = _status,
     started = _started,
     level = "ok",
-    synced = "not reported",
+    synced = false,
     status = "TENT node down",
     version = am.app.get_version(),
     type = am.app.get_type()
@@ -75,6 +75,7 @@ if _info.snowgemd == "running" then
             if _success then
                 if _output.IsBlockchainSync == true then
                     _info.status = "Synced"
+                    _info.synced = true
                 else
                     _info.level = "warn"
                     _info.status = "Syncing..."
