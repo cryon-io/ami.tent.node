@@ -15,7 +15,7 @@ return {
                     description = "Configures application, renders templates and installs services"
                 }
             },
-            action = function(_options, _, _, _cli)
+            action = function(_options, _, _, _)
                 local _noOptions = #table.keys(_options) == 0
                 if _noOptions or _options.environment then
                     am.app.prepare()
@@ -100,9 +100,6 @@ return {
             index = 6,
             description = "snowgemd 'removedb' command",
             summary = "Removes snowgemd database",
-            options = {
-                help = HELP_OPTION
-            },
             action = "__btc/removedb.lua",
             contextFailExitCode = EXIT_RM_DATA_ERROR
         },
