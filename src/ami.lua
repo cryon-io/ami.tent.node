@@ -45,7 +45,6 @@ return {
         start = {
             description = "ami 'start' sub command",
             summary = "Starts the TENT node",
-            type = "extension",
             action = "__btc/start.lua",
             contextFailExitCode = EXIT_APP_START_ERROR
         },
