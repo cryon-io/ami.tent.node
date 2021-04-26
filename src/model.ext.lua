@@ -4,7 +4,7 @@ am.app.set_model(
             server = (type(am.app.get_config("NODE_PRIVKEY") == "string") or am.app.get_config("SERVER")) and 1 or nil,
             listen = (type(am.app.get_config("NODE_PRIVKEY") == "string") or am.app.get_config("SERVER")) and 1 or nil,
             masternodeprivkey = am.app.get_config("NODE_PRIVKEY"),
-            masternode = am.app.get_config("NODE_PRIVKEY") and 1
+            masternode = am.app.get_config("NODE_PRIVKEY") and 1 or nil
         },
         DAEMON_NAME = "snowgemd",
         CLI_NAME = "snowgem-cli",
