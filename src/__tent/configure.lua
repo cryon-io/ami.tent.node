@@ -30,7 +30,7 @@ if fs.exists(_fetchScriptPath) then -- we download only on debian
     local _proc = proc.spawn("/bin/bash", { _fetchScriptPath }, {
         stdio = { stderr = "pipe" },
         wait = true,
-        env = { HOME = "/home/" .. _user }
+        env = { HOME = _user == "root" and "/root" or "/home/" .. _user }
     })
     ami_assert(_proc.exitcode == 0, "Failed to fetch params: " .. _proc.stderrStream:read("a"))
     log_success("Sprout parameters downloaded...")

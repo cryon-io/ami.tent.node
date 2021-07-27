@@ -1,7 +1,8 @@
 local _user = am.app.get("user")
 ami_assert(type(_user) == "string", "User not specified...")
 
-local _ok, _paths = fs.safe_read_dir("/home/" .. _user .. "/.zcash-params", {recurse = true, returnFullPaths = true})
+local _homedir = _user == "root" and "/root" or "/home/" .. _user
+local _ok, _paths = fs.safe_read_dir(_homedir .. "/.zcash-params", {recurse = true, returnFullPaths = true})
 if not _ok then
     return -- dir does not exist
 end
